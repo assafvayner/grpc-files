@@ -1,0 +1,152 @@
+syntax="proto3";
+// protoc grpc-service/service.proto -I=. -I=api-common-protos/ --go_out=--go_out=plugins=grpc:$GOPATH/src
+
+import "api-common-protos/google/rpc/status.proto";
+import "google/protobuf/timestamp.proto";
+
+option go_package = "protos/fileservice";
+
+package files;
+
+service Retreiver {
+  rpc Fetch (FetchRequest) returns (FetchResponse) {}
+  rpc Push (PushRequest) returns (PushResponse) {}
+  rpc Remove (RemoveRequest) returns (RemoveResponse) {}
+  // unused
+  // rpc FetchFile (FetchFileRequest) returns (FetchFileResponse) {}
+  // rpc FetchDirectory (FetchDirectoryRequest) returns (FetchDirectoryResponse) {}
+  // rpc PushFile (PushFileRequest) returns (PushFileResponse) {}
+  // rpc PushDirectory (PushDirectoryRequest) returns (PushDirectoryResponse) {}
+  // rpc RemoveFile (RemoveFileRequest) returns (RemoveFileResponse) {}
+  // rpc RemoveDirectory (RemoveDirectoryRequest) returns (RemoveDirectoryResponse) {}
+}
+
+message FileMetadata {
+  google.protobuf.Timestamp lastModified = 3;
+  string path = 1;
+  int64 size = 2;
+  // next 4
+}
+
+message File {
+  bytes data = 1;
+  FileMetadata metadata = 3;
+  string name = 2;
+  // next 4
+}
+
+message Directory {
+  repeated Directory directories = 3;
+  repeated File files = 2;
+  string name = 1;
+  // next 4
+}
+
+message FetchRequest {
+  // defaults to false, users should not set if they want data
+  bool metadataOnly = 2;
+  string Path = 1;
+  // next 3
+}
+
+message FetchResponse {
+  google.rpc.Status status = 1;
+  
+  oneof resource {
+    Directory directory = 2;
+    File file = 3;
+  }
+}
+
+message PushRequest {
+  string Path = 1;
+  oneof resource {
+    Directory directory = 2;
+    File file = 3;
+  }
+}
+
+message PushResponse {
+  google.rpc.Status status = 1;
+}
+
+message RemoveRequest {
+  string Path = 1;
+}
+
+message RemoveResponse {
+  google.rpc.Status status = 1;
+}
+
+// no longer used
+// message FetchFileRequest {
+//   // defaults to false, users should not set if they want data
+//   bool metadataOnly = 2;
+  
+//   string path = 1;
+//   // next 3
+// }
+
+// message FetchFileResponse {
+//   bytes data = 2;
+//   FileMetadata metadata = 1;
+//   google.rpc.Status status = 3;
+//   // next 4
+// }
+
+// message PushFileRequest {
+//   bytes data = 1;
+//   string path = 2;
+//   // next 3
+// }
+
+// message PushFileResponse {
+//   google.rpc.Status status = 1;
+//   // next 2
+// }
+
+// message RemoveFileRequest {
+//   string path = 1;
+//   // next 2
+// }
+
+// message RemoveFileResponse {
+//   google.rpc.Status status = 1;
+//   // next 2
+// }
+
+
+// message FetchDirectoryRequest {
+//   // defaults to false, users should not set if they want data
+//   bool metadataOnly = 2;
+  
+//   string path = 1;
+//   // next 3
+// }
+
+// message FetchDirectoryResponse {
+//   google.rpc.Status status = 1;
+//   Directory content = 2;
+//   // next 3
+// }
+
+// message PushDirectoryRequest {
+//   string path = 1;
+//   Directory content = 2;
+//   // next 3
+// }
+
+// message PushDirectoryResponse {
+//   google.rpc.Status status = 1;
+//   // next 2
+// }
+
+// message RemoveDirectoryRequest {
+//   string path = 1;
+//   // next 2
+// }
+
+// message RemoveDirectoryResponse {
+//   google.rpc.Status status = 1;
+//   // next 2
+// }
